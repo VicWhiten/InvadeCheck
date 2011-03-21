@@ -1,0 +1,18 @@
+name: InvadeCheck
+main: com.bukkit.vicwhiten.invadecheck.InvadeCheck
+version: 0.1
+author: VicWhiten
+description: >
+             Used by the Nations at War Server
+commands:
+  invade:
+    description: displays what nations can be invaded
+    usage: |
+           /<command> [nation]
+           Example: /<command> - displays the nations that can be invaded
+           Example: /<command> Fire - will begin an invasion of Fire Nation, or help start an invasion
+  invademin:
+    description: sets the minimum amount of players needed logged on to invade a nation
+    usage: |
+           /<command> [amount]
+           Example: /<command> 2 - sets the minimum players needed to 2
