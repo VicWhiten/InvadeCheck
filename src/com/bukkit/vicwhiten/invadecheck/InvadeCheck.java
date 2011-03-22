@@ -1,6 +1,10 @@
 //The Package
 package com.bukkit.vicwhiten.invadecheck;
 //All the imports
+import java.util.ArrayList;
+import java.util.HashMap;
+
+
 import org.anjocaido.groupmanager.GroupManager;
 import org.anjocaido.groupmanager.dataholder.worlds.WorldsHolder;
 import org.bukkit.plugin.Plugin;
@@ -17,6 +21,7 @@ public class InvadeCheck extends JavaPlugin{
     public GroupManager gm;
     public WorldsHolder wd;
     public EpicZones ez;
+    public ArrayList<ArrayList<HashMap<String, Boolean>>> users = new ArrayList<ArrayList<HashMap<String,Boolean>>>();
 	
 
 	
@@ -40,7 +45,6 @@ public class InvadeCheck extends JavaPlugin{
 	        } else {
 	            this.getPluginLoader().disablePlugin(this);
 	        }
-	        
 			//check if Group Manager is setup
 			System.out.println("InvadeCheck Plugin Enabled!");
 			 Plugin p2 = this.getServer().getPluginManager().getPlugin("EpicZones");
@@ -53,11 +57,20 @@ public class InvadeCheck extends JavaPlugin{
 		        } else {
 		            this.getPluginLoader().disablePlugin(this);
 		        }
-	        
+	    //prepare users
+		 for(int i=0; i<4; i++)
+		 {
+			 users.add(new ArrayList<HashMap<String,Boolean>>());
+			for(int j=0; j<4; j++)
+			{
+				users.get(i).add(new HashMap<String,Boolean>());
+			}
+		 }
 	        
 	    //setup the commands
 		getCommand("invade").setExecutor(new InvadeCommand(this));
 		getCommand("invademin").setExecutor(new SetMinCommand(this));
+		getCommand("defend").setExecutor(new InvadeCommand(this));
 	}
 
 	   

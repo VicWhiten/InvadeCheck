@@ -11,6 +11,11 @@ commands:
            /<command> [nation]
            Example: /<command> - displays the nations that can be invaded
            Example: /<command> Fire - will begin an invasion of Fire Nation, or help start an invasion
+  defend:
+    description: attempts to defend a nation
+    usage: |
+           /<command> [nation]
+           Example: /<command> Fire - will begin an attempt to defend Fire Nation, which will be approved by fire
   invademin:
     description: sets the minimum amount of players needed logged on to invade a nation
     usage: |

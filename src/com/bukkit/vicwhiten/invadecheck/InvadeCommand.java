@@ -34,14 +34,12 @@ public class InvadeCommand implements CommandExecutor {
     public final List<String> nations =Arrays.asList("Fire", "Water", "Earth", "Air");
     public final ChatColor[] nationColors = {ChatColor.DARK_RED, ChatColor.BLUE, ChatColor.GREEN, ChatColor.YELLOW};
     public int[] numberOnline = {0,0,0,0};
-    public boolean[] canInvade = {true,true,true,true};
+    public boolean[][] canInvade = {{true,true,true,true},{true,true,true,true},
+    		{true,true,true,true},{true,true,true,true}};
     public boolean[] attemptingInvasion = {false, false, false, false};
     public Coords[] nationLocs = {new Coords(355,950,696,1293),new Coords(-968,-233,-674,73),
     		new Coords(241,-317,620,-16), new Coords(-975,1036,-677,1351)};
-    public HashMap<String, Boolean> fireUsers = new HashMap<String, Boolean>(); 
-    public HashMap<String, Boolean> waterUsers = new HashMap<String, Boolean>();
-    public HashMap<String, Boolean> earthUsers = new HashMap<String, Boolean>();
-    public HashMap<String, Boolean> airUsers = new HashMap<String, Boolean>();
+
     public final int MIN = 60000;
     public final int TWENTY_FIVE_MIN = 1500000;
     public final int FIVE_MIN = 300000;
@@ -55,7 +53,11 @@ public class InvadeCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, 
     		Command command, 
     		String label, String[] args) {
-    	System.out.println("Invade Command Called!");
+    	System.out.println("Invade Command Called, " + label);
+    	if(label == "defend" && args.length == 1)
+    	{
+    		return defendAttempt(sender, command, label, args);
+    	}
     	if(args.length == 0)
     	{
     		return invadeStatus(sender, command, label, args);
@@ -68,6 +70,10 @@ public class InvadeCommand implements CommandExecutor {
     	
     }
     
+    public boolean defendAttempt(CommandSender sender, Command command, String label, String[] args)
+    {
+    	return false;
+    }
     public boolean invadeAttempt(CommandSender sender, 
     		Command command, 
     		String label, String[] args)
@@ -94,10 +100,11 @@ public class InvadeCommand implements CommandExecutor {
     		return true;
     	}
     	
-    	if(!canInvade[invaderIndex])
+    	if(!canInvade[invaderIndex][defenderIndex])
     	{
     		
-    		sender.sendMessage(ALERT_PREFIX + "You cannot invade at this time");
+    		sender.sendMessage(ALERT_PREFIX + "You cannot invade " + nationColors[defenderIndex]
+    		                   + nations.get(defenderIndex) + ChatColor.WHITE + " at this time");
     		sender.sendMessage(ALERT_PREFIX + "You must wait 30min between invasions");
     		return true;
     	}
@@ -119,57 +126,20 @@ public class InvadeCommand implements CommandExecutor {
     		sendNationMessage(invaderIndex, ALERT_PREFIX + nationColors[invaderIndex] + player.getName() + ChatColor.WHITE +
     		                  " has begun an attempt to invade " + nationColors[defenderIndex] + nations.get(defenderIndex));
     		sendNationMessage(invaderIndex, ALERT_PREFIX + "You must have half of your online users '/invade nation' in the next minute.");
-    		if(invaderIndex == 0)
-    		{
-    			fireUsers = new HashMap<String, Boolean>();
-    		}
-    		if(invaderIndex == 1)
-    		{
-    			waterUsers = new HashMap<String, Boolean>();
-    		}
-    		if(invaderIndex == 2)
-    		{
-    			earthUsers = new HashMap<String, Boolean>();
-    		}
-    		if(invaderIndex == 3)
-    		{
-    			airUsers = new HashMap<String, Boolean>();
-    		}	
+    		
+    		plugin.users.get(invaderIndex).get(defenderIndex).clear();
     		Timer invadeSetup = new Timer();
     		invadeSetup.schedule(new InvadeSetupTimerTask(invaderIndex, defenderIndex), MIN);
     	}
     	
     	
-		if(invaderIndex == 0)
-		{
-			fireUsers.put(player.getName(), true);
+
+			plugin.users.get(invaderIndex).get(defenderIndex).put(player.getName(), true);
 			
-			sendNationMessage(invaderIndex, ALERT_PREFIX + "You have " + fireUsers.size() + "/" +
+			sendNationMessage(invaderIndex, ALERT_PREFIX + "You have " + 
+					plugin.users.get(invaderIndex).get(defenderIndex).size() + "/" +
 					(numberOnline[invaderIndex] / 2) + " users needed to invade " + 
 					nationColors[defenderIndex] + nations.get(defenderIndex));
-		}
-		if(invaderIndex == 1)
-		{
-			waterUsers.put(player.getName(), true);
-			sendNationMessage(invaderIndex, ALERT_PREFIX + "You have " + waterUsers.size() + "/" +
-					(numberOnline[invaderIndex] / 2) + " users needed to invade " + 
-					nationColors[defenderIndex] + nations.get(defenderIndex));
-		}
-		if(invaderIndex == 2)
-		{
-			earthUsers.put(player.getName(), true);
-			sendNationMessage(invaderIndex, ALERT_PREFIX + "You have " + earthUsers.size() + "/" +
-					(numberOnline[invaderIndex] / 2) + " users needed to invade " + 
-					nationColors[defenderIndex] + nations.get(defenderIndex));
-		}
-		if(invaderIndex == 3)
-		{
-			airUsers.put(player.getName(), true);
-			sendNationMessage(invaderIndex, ALERT_PREFIX + "You have " + airUsers.size() + "/" +
-					(numberOnline[invaderIndex] / 2) + " users needed to invade " + 
-					nationColors[defenderIndex] + nations.get(defenderIndex));
-		}
-		
 		
     		return true;
     }
@@ -318,7 +288,7 @@ public class InvadeCommand implements CommandExecutor {
         				" has ended!");
         		//setup cooldown
         		Timer cooldown = new Timer();
-        		cooldown.schedule(new InvadeCooldownTimerTask(invaderIndex), TWENTY_FIVE_MIN + FIVE_MIN);
+        		cooldown.schedule(new InvadeCooldownTimerTask(invaderIndex, defenderIndex), TWENTY_FIVE_MIN + FIVE_MIN);
         		
         		//slay invaders in the zone
         		slayIntruders(invaderIndex, defenderIndex);
@@ -328,15 +298,18 @@ public class InvadeCommand implements CommandExecutor {
     }
     class InvadeCooldownTimerTask extends TimerTask{
     	int invaderIndex;
+    	int defenderIndex;
     	
-    	public InvadeCooldownTimerTask(int invader)
+    	public InvadeCooldownTimerTask(int invader, int defender)
     	{
     		invaderIndex = invader;
     	}
     	
     	public void run()
     	{
-    		canInvade[invaderIndex] = true;
+    		canInvade[invaderIndex][defenderIndex] = true;
+    		sendNationMessage(invaderIndex, nationColors[invaderIndex] + nations.get(invaderIndex)
+    				+ ChatColor.WHITE + " can now invade " + nationColors[defenderIndex] + nations.get(defenderIndex));
     	}
     }
     class fiveMinWarningTimerTask extends TimerTask{
@@ -372,14 +345,11 @@ public class InvadeCommand implements CommandExecutor {
 		}
 		public void run() {
 			
-			setOnlineCount(plugin.getServer());
-			int[]temp = {fireUsers.size(), waterUsers.size(), earthUsers.size(), airUsers.size()};
-			
-		
-			if(temp[invaderIndex] >=(numberOnline[invaderIndex] / 2))
+			setOnlineCount(plugin.getServer());		
+			if(plugin.users.get(invaderIndex).get(defenderIndex).size() >=(numberOnline[invaderIndex] / 2))
 			{
 				//invasion will begin
-				canInvade[invaderIndex] = false;
+				canInvade[invaderIndex][defenderIndex] = false;
 				attemptingInvasion[invaderIndex] = false;
 				plugin.getServer().broadcastMessage(ALERT_PREFIX + nationColors[invaderIndex] + 
 						nations.get(invaderIndex) + "\'s" + ChatColor.WHITE + " invasion attempt of " +
