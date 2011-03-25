@@ -3,13 +3,10 @@ package com.bukkit.vicwhiten.invadecheck;
 
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-
+import java.util.Calendar;
 import org.anjocaido.groupmanager.data.Group;
 import org.anjocaido.groupmanager.data.User;
 import org.anjocaido.groupmanager.dataholder.OverloadedWorldHolder;
@@ -78,6 +75,11 @@ public class InvadeCommand implements CommandExecutor {
     		Command command, 
     		String label, String[] args)
     {
+    	Calendar cal = Calendar.getInstance();
+    	if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY)
+    	{
+    		sender.sendMessage("No Invasions on Thursday!");
+    	}
     	//check if the nation is already attempting to invade
     	Player player = (Player) sender;
     	User user = plugin.wd.getDefaultWorld().getUser(player.getName());
