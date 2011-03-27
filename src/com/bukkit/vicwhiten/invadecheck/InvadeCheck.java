@@ -45,7 +45,7 @@ public class InvadeCheck extends JavaPlugin{
 	        } else {
 	            this.getPluginLoader().disablePlugin(this);
 	        }
-			//check if Group Manager is setup
+			//check if Epic Zones is setup
 			System.out.println("InvadeCheck Plugin Enabled!");
 			 Plugin p2 = this.getServer().getPluginManager().getPlugin("EpicZones");
 		        if (p2 != null) {
